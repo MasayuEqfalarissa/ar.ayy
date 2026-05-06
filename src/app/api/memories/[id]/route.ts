@@ -1,7 +1,6 @@
 import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
-import { unlink } from 'fs/promises';
-import path from 'path';
+import { del } from '@vercel/blob';
 
 export async function DELETE(request: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
@@ -12,10 +11,8 @@ export async function DELETE(request: Request, { params }: { params: Promise<{ i
     if (!memory) return NextResponse.json({ error: 'Not found' }, { status: 404 });
 
     try {
-      const filename = memory.mediaUrl.split('/').pop();
-      if (filename) {
-        const filePath = path.join(process.cwd(), 'public', 'uploads', filename);
-        await unlink(filePath);
+      if (memory.mediaUrl && memory.mediaUrl.includes('public.blob.vercel-storage.com')) {
+        await del(memory.mediaUrl);
       }
     } catch (e) {
       console.warn('Failed to delete file, might already be deleted', e);

@@ -1,7 +1,6 @@
 import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
-import { writeFile } from 'fs/promises';
-import path from 'path';
+import { put } from '@vercel/blob';
 
 export async function GET() {
   try {
@@ -26,14 +25,11 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
     }
 
-    const bytes = await file.arrayBuffer();
-    const buffer = Buffer.from(bytes);
-
-    // Save file
-    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-    const filename = uniqueSuffix + '-' + file.name.replace(/\s+/g, '-');
-    const uploadPath = path.join(process.cwd(), 'public', 'uploads', filename);
-    await writeFile(uploadPath, buffer);
+    // Upload to Vercel Blob
+    const uniqueFilename = `${Date.now()}-${file.name.replace(/\s+/g, '-')}`;
+    const blob = await put(uniqueFilename, file, {
+      access: 'public',
+    });
 
     const mediaType = file.type.startsWith('video/') ? 'video' : 'image';
     const date = dateStr ? new Date(dateStr) : new Date();
@@ -42,7 +38,7 @@ export async function POST(request: Request) {
       data: {
         title,
         description,
-        mediaUrl: `/uploads/${filename}`,
+        mediaUrl: blob.url,
         mediaType,
         date,
       }
