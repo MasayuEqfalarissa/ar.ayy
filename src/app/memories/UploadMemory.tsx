@@ -11,6 +11,7 @@ export default function UploadMemory() {
   const [isRecording, setIsRecording] = useState(false);
   const [recordedBlob, setRecordedBlob] = useState<Blob | null>(null);
   const [countdown, setCountdown] = useState<number | null>(null);
+  const [recordedExt, setRecordedExt] = useState("webm");
   
   const videoRef = useRef<HTMLVideoElement>(null);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
@@ -60,8 +61,11 @@ export default function UploadMemory() {
     };
 
     mediaRecorder.onstop = () => {
-      const blob = new Blob(chunksRef.current, { type: "video/webm" });
+      const mimeType = mediaRecorderRef.current?.mimeType || "video/webm";
+      const ext = mimeType.includes("mp4") ? "mp4" : "webm";
+      const blob = new Blob(chunksRef.current, { type: mimeType });
       setRecordedBlob(blob);
+      setRecordedExt(ext);
       stopCamera();
     };
 
@@ -94,7 +98,7 @@ export default function UploadMemory() {
     
     // If we recorded a live photo, override the file input
     if (recordedBlob) {
-      formData.set("file", recordedBlob, "livephoto.webm");
+      formData.set("file", recordedBlob, `livephoto.${recordedExt}`);
     }
     
     try {
