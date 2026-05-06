@@ -1,0 +1,59 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+model Memory {
+  id          Int      @id @default(autoincrement())
+  title       String
+  description String?
+  mediaUrl    String
+  mediaType   String   // "image" or "video"
+  date        DateTime @default(now())
+  createdAt   DateTime @default(now())
+}
+
+model Transaction {
+  id          Int      @id @default(autoincrement())
+  type        String   // "income" or "expense"
+  amount      Float
+  category    String
+  description String?
+  date        DateTime @default(now())
+  createdAt   DateTime @default(now())
+}
+
+model Milestone {
+  id          Int      @id @default(autoincrement())
+  title       String   // e.g. "Our Anniversary", "First Met"
+  date        DateTime
+  createdAt   DateTime @default(now())
+}
+
+model BucketItem {
+  id          Int      @id @default(autoincrement())
+  title       String
+  description String?
+  isCompleted Boolean  @default(false)
+  completedAt DateTime?
+  createdAt   DateTime @default(now())
+}
+
+model RouletteOption {
+  id    Int    @id @default(autoincrement())
+  text  String
+}
+
+model Mood {
+  id          Int      @id @default(autoincrement())
+  name        String   // "Rizky" or "Ayu"
+  emoji       String   // e.g., "😊", "😫", "🥺"
+  date        DateTime @default(now()) // We will use this to group by day
+}
